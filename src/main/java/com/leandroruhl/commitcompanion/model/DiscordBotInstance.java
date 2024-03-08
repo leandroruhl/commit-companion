@@ -23,6 +23,12 @@ public class DiscordBotInstance {
     private Long id;
     private String serverId;
     private String channelId;
-    @ElementCollection
-    private List<Long> repositoryIds; // List of GitHub repositories to watch
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<RepoInfo> repositories; // List of GitHub repositories to watch
+
+    public DiscordBotInstance(String serverId, String channelId) {
+        this.serverId = serverId;
+        this.channelId = channelId;
+        this.repositories = new ArrayList<>();
+    }
 }
