@@ -17,8 +17,10 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.discord4j:discord4j-core:3.3.0-RC1'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.2'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
