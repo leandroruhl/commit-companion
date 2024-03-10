@@ -3,13 +3,15 @@ package com.leandroruhl.commitcompanion.service;
 import com.leandroruhl.commitcompanion.model.DiscordBotInstance;
 import com.leandroruhl.commitcompanion.model.RepoInfo;
 import com.leandroruhl.commitcompanion.repository.DiscordBotInstanceRepository;
-import com.leandroruhl.commitcompanion.repository.RepoInfoRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 public class DiscordBotInstanceService {
     private final DiscordBotInstanceRepository discordBotInstanceRepository;
     private final RepoInfoService repoInfoService;
+    private final RestTemplate restTemplate;
 
     public List<DiscordBotInstance> getBotInstancesByRepository(RepoInfo repository) {
         return discordBotInstanceRepository.findAllByRepositoriesContaining(repository);
@@ -45,20 +48,20 @@ public class DiscordBotInstanceService {
         String owner = parts[parts.length - 2];
         String repo = parts[parts.length - 1];
 
-        WebClient webClient = WebClient.create();
+        String url = "https://api.github.com/repos/" + owner + "/" + repo;
+        ResponseEntity<RepoInfo> responseEntity;
 
-        RepoInfo repository = webClient.get()
-                .uri("https://api.github.com/repos/" + owner + "/" + repo)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    if (clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
-                        return Mono.error(new IllegalArgumentException("Repository not found"));
-                    }
-                    return Mono.error(new IllegalArgumentException("Client error occurred"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, response -> Mono.error(new IllegalArgumentException("Server error occurred")))
-                .bodyToMono(RepoInfo.class)
-                .block();
+        try {
+            responseEntity = restTemplate.getForEntity(url, RepoInfo.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new IllegalArgumentException("Repository not found");
+        } catch (HttpClientErrorException e) {
+            throw new IllegalArgumentException("Client error occurred");
+        } catch (HttpServerErrorException e) {
+            throw new IllegalArgumentException("Server error occurred");
+        }
+
+        RepoInfo repository = responseEntity.getBody();
 
         if (repoInfoService.existsById(repository.getId())) {
             throw new IllegalArgumentException("Repository is already being watched");

@@ -2,7 +2,6 @@ package com.leandroruhl.commitcompanion.listeners;
 
 import com.leandroruhl.commitcompanion.model.DiscordBotInstance;
 import com.leandroruhl.commitcompanion.service.DiscordBotInstanceService;
-import com.leandroruhl.commitcompanion.service.RepoInfoService;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.MessageCreateMono;
