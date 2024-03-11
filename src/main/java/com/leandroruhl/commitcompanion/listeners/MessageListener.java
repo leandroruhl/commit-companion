@@ -73,8 +73,8 @@ public abstract class MessageListener {
             }
 
             discordBotService.createBotInstance(serverId, channelId);
-            return channel.createMessage("Channel set successfully!");
 
+            return channel.createMessage("Channel set successfully!");
         } catch (Exception e) {
             log.error(e.getMessage());
             return channel.createMessage("An error occurred while executing the set channel command");
