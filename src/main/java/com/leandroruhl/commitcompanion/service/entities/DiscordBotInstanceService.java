@@ -1,18 +1,17 @@
-package com.leandroruhl.commitcompanion.service;
+package com.leandroruhl.commitcompanion.service.entities;
 
 import com.leandroruhl.commitcompanion.model.DiscordBotInstance;
 import com.leandroruhl.commitcompanion.model.RepoInfo;
 import com.leandroruhl.commitcompanion.repository.DiscordBotInstanceRepository;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.util.Color;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -70,6 +69,33 @@ public class DiscordBotInstanceService {
         List<RepoInfo> repositories = discordBotInstance.getRepositories();
         repositories.add(repository);
         discordBotInstance.setRepositories(repositories);
+        discordBotInstanceRepository.save(discordBotInstance);
+    }
+
+    public EmbedCreateSpec createEmbed(List<RepoInfo> repoList) {
+        EmbedCreateSpec.Builder embed = EmbedCreateSpec.builder()
+                .title("Repository Watch List")
+                .description("List of GitHub repositories being watched by the bot")
+                .color(Color.WHITE);
+
+        for (RepoInfo repoInfo : repoList) {
+            embed.addField("", "\u200B", false)
+                    .addField("Name", repoInfo.getFull_name(), false)
+                    .addField("ID", String.valueOf(repoInfo.getId()), false);
+        }
+
+        return embed.build();
+    }
+
+    public void removeRepositoryFromBotInstance(DiscordBotInstance discordBotInstance, String repoId) {
+        Long id = Long.parseLong(repoId);
+
+        if (!repoInfoService.existsById(id)) {
+            throw new IllegalArgumentException("Repository is not being watched");
+        }
+
+        List<RepoInfo> repositories = discordBotInstance.getRepositories();
+        repositories.removeIf(repo -> repo.getId().equals(id));
         discordBotInstanceRepository.save(discordBotInstance);
     }
 }

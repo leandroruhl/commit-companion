@@ -1,7 +1,7 @@
 package com.leandroruhl.commitcompanion.listeners;
 
 import com.leandroruhl.commitcompanion.model.DiscordBotInstance;
-import com.leandroruhl.commitcompanion.service.DiscordBotInstanceService;
+import com.leandroruhl.commitcompanion.service.entities.DiscordBotInstanceService;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.spec.MessageCreateMono;
@@ -20,8 +20,16 @@ public abstract class MessageListener {
 
     public MessageListener(DiscordBotInstanceService discordBotInstanceService) {
         this.discordBotService = discordBotInstanceService;
+        commandMap.put("!help", this::handleHelp);
         commandMap.put("!setCommitCompanionChannel", this::handleSetChannel);
         commandMap.put("!watchRepository", this::handleWatchRepository);
+        commandMap.put("!listRepositories", this::handleListRepositories);
+        commandMap.put("!removeRepository", this::handleRemoveRepository);
+    }
+
+    @FunctionalInterface
+    private interface CommandHandler {
+        MessageCreateMono handle(MessageChannel channel, String content, String[] args);
     }
 
     public Mono<Void> processMessage(final Message eventMessage) {
@@ -97,8 +105,55 @@ public abstract class MessageListener {
         }
     }
 
-    @FunctionalInterface
-    private interface CommandHandler {
-        MessageCreateMono handle(MessageChannel channel, String content, String[] args);
+    private MessageCreateMono handleListRepositories(MessageChannel channel, String content, String[] args) {
+        try {
+            DiscordBotInstance bot = discordBotService.getBotInstanceByServerId(serverId);
+
+            if (bot == null) {
+                return channel.createMessage("Please set the bot channel first using the !setCommitCompanionChannel command");
+            }
+
+            if (bot.getRepositories().isEmpty()) {
+                return channel.createMessage("No repositories being watched");
+            }
+
+            return channel.createMessage(discordBotService.createEmbed(bot.getRepositories()));
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return channel.createMessage("An error occurred while executing the list repositories command");
+        }
     }
+
+    private MessageCreateMono handleRemoveRepository(MessageChannel channel, String content, String[] args) {
+        try {
+            DiscordBotInstance bot = discordBotService.getBotInstanceByServerId(serverId);
+
+            if (bot == null) {
+                return channel.createMessage("Please set the bot channel first using the !setCommitCompanionChannel command");
+            }
+
+            if (bot.getRepositories().isEmpty()) {
+                return channel.createMessage("No repositories being watched");
+            }
+
+            discordBotService.removeRepositoryFromBotInstance(bot, args[1]);
+            return channel.createMessage("Repository removed successfully!");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return channel.createMessage("An error occurred while executing the remove repository command");
+        }
+    }
+
+    private MessageCreateMono handleHelp(MessageChannel channel, String content, String[] args) {
+        return channel.createMessage(
+                "Available commands:\n" +
+                        "1. `!help` - Shows this message\n" +
+                        "2. `!setCommitCompanionChannel` - Sets the channel where the bot will send messages\n" +
+                        "3. `!watchRepository [Repository URL]` - Adds the repository in the URL to the bot watch list.\n" +
+                        "***IMPORTANT: you need to create a webhook in the repository with an URL that points to the bot's /webhook endpoint***\n" +
+                        "4. `!listRepositories` - Lists the repositories being watched by the bot\n" +
+                        "5. `!removeRepository [Repository ID]` - Removes a repository from the watch list. The ID is the repository's ID in the list"
+        );
+    }
+
 }

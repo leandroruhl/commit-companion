@@ -1,4 +1,4 @@
-package com.leandroruhl.commitcompanion.service;
+package com.leandroruhl.commitcompanion.service.entities;
 
 import com.leandroruhl.commitcompanion.model.RepoInfo;
 import com.leandroruhl.commitcompanion.repository.RepoInfoRepository;

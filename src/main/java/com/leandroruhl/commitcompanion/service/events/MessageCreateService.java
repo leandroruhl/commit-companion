@@ -1,7 +1,8 @@
-package com.leandroruhl.commitcompanion.service;
+package com.leandroruhl.commitcompanion.service.events;
 
 import com.leandroruhl.commitcompanion.listeners.EventListener;
 import com.leandroruhl.commitcompanion.listeners.MessageListener;
+import com.leandroruhl.commitcompanion.service.entities.DiscordBotInstanceService;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;

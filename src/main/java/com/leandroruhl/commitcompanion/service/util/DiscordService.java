@@ -1,8 +1,10 @@
-package com.leandroruhl.commitcompanion.service;
+package com.leandroruhl.commitcompanion.service.util;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leandroruhl.commitcompanion.model.DiscordBotInstance;
 import com.leandroruhl.commitcompanion.model.RepoInfo;
+import com.leandroruhl.commitcompanion.service.entities.DiscordBotInstanceService;
+import com.leandroruhl.commitcompanion.service.entities.RepoInfoService;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -95,4 +97,5 @@ public class DiscordService {
             log.error("An error occurred while processing the webhook: " + e.getMessage());
         }
     }
+
 }
