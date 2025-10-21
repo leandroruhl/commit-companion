@@ -1,3 +1,8 @@
+> ⚠️ **Deprecated**
+> 
+> Heads-up: You don’t need to host anything for this anymore. Use GitHub Actions instead, 
+[here is a short tutorial for that](https://github.com/leandroruhl/commit-companion/issues/1#issuecomment-3428672334).
+
 # Discord Commit Companion Bot
 
 The **Discord Commit Companion Bot** is a Discord bot designed to provide real-time notifications of commits made to GitHub repositories. It allows users to configure specific GitHub repositories they wish to monitor and receive notifications directly in Discord channels.
